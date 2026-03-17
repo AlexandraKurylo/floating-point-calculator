@@ -78,7 +78,7 @@ export interface CalculationResult {
 }
 ```
 
-###🧠 Логіка програми (Core Logic)
+### 🧠 Логіка програми (Core Logic)
 
 1. Десятково-двійкове перетворення та нормалізаціяФункція getBinaryData виконує переклад числа у плаваючу форму. Вона визначає мантису та порядок (2^k) на основі ваги цілої частини.
 
@@ -92,14 +92,14 @@ export interface CalculationResult {
 
 2. Вирівнювання порядків (Aligning Exponents)Перед додаванням мантис необхідно звести їх до спільного знаменника. Функція alignMantissa зсуває мантису меншого числа вправо на різницю порядків.
 
-```typescript
-const alignMantissa = (m: string, currentExp: number, targetExp: number) => {
-  const diff = targetExp - currentExp; // Різниця порядків
-  if (diff <= 0) return m;
-  // Зсув мантиси праворуч із заповненням нулями зліва
-  return "0".repeat(diff) + m.substring(0, 12 - diff);
-};
-```
+   ```typescript
+   const alignMantissa = (m: string, currentExp: number, targetExp: number) => {
+     const diff = targetExp - currentExp; // Різниця порядків
+     if (diff <= 0) return m;
+     // Зсув мантиси праворуч із заповненням нулями зліва
+     return "0".repeat(diff) + m.substring(0, 12 - diff);
+   };
+   ```
 
 3. Генерація модифікованих кодівФункція getCodes реалізує знаковий контроль. Використання двох знаковых розрядів (00 або 11) дозволяє системі розпізнавати переповнення.
 
