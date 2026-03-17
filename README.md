@@ -65,21 +65,24 @@ export interface MantissaCodes {
 
 Глобальний об'єкт, що агрегує всі дані для відображення в інтерфейсі.
 
-````typescript
+```typescript
 export interface CalculationResult {
-    exp: string; // Порядок числа (Експонента)
-    A: ExtendedCodes; // Об'єкт першого операнда (коди + знак)
-    B: ExtendedCodes; // Об'єкт другого операнда (коди + знак)
-    C: {
+  exp: string; // Порядок числа (Експонента)
+  A: ExtendedCodes; // Об'єкт першого операнда (коди + знак)
+  B: ExtendedCodes; // Об'єкт другого операнда (коди + знак)
+  C: {
     mod: string; // Сума мантис у модифікованому коді
     c10: string; // Результат у десятковій системі (Base-10)
-    };
+  };
 }
 ```
+
 ## 🧠 Логіка програми (Core Logic)
+
 Нижче наведено розбір ключових алгоритмів, реалізованих у файлі BinaryLab.tsx.
 
 ### 1. Генерація модифікованих кодів
+
 Функція getCodes відповідає за створення модифікованого додаткового коду. Використовується два знакові розряди (00 або 11).
 
 ```typescript
@@ -90,29 +93,31 @@ const direct = `${sign},${mantissa}`; // Формування прямого к�
 let carry = 1; // Додаємо 1 до молодшого розряду зворотного коду
 let compM = "";
 for (let i = inverseM.length - 1; i >= 0; i--) {
-const sum = parseInt(inverseM[i]) + carry;
-compM = (sum % 2) + compM; // Результат розряду
-carry = sum > 1 ? 1 : 0; // Перенос у наступний розряд
+  const sum = parseInt(inverseM[i]) + carry;
+  compM = (sum % 2) + compM; // Результат розряду
+  carry = sum > 1 ? 1 : 0; // Перенос у наступний розряд
 }
 ```
+
 ### 2. Двійковий суматор
+
 Функція addBinary імітує роботу апаратного суматора, виконуючи додавання "у стовпчик" із врахуванням розділової коми.
 
 ```typescript
 const addBinary = (s1: string, s2: string): string => {
-let carry = 0;
-let res = "";
-// Видаляємо візуальну кому для проведення обчислень
-const a = s1.replace(",", "");
-const b = s2.replace(",", "");
+  let carry = 0;
+  let res = "";
+  // Видаляємо візуальну кому для проведення обчислень
+  const a = s1.replace(",", "");
+  const b = s2.replace(",", "");
 
-for (let i = a.length - 1; i >= 0; i--) {
-const sum = parseInt(a[i]) + parseInt(b[i]) + carry;
-res = (sum % 2) + res; // Біт результату
-carry = sum > 1 ? 1 : 0; // Перенос
-}
-// Повернення коми на місце після двох знакових розрядів
-return res.substring(0, 2) + "," + res.substring(2);
+  for (let i = a.length - 1; i >= 0; i--) {
+    const sum = parseInt(a[i]) + parseInt(b[i]) + carry;
+    res = (sum % 2) + res; // Біт результату
+    carry = sum > 1 ? 1 : 0; // Перенос
+  }
+  // Повернення коми на місце після двох знакових розрядів
+  return res.substring(0, 2) + "," + res.substring(2);
 };
 ```
 
@@ -131,4 +136,3 @@ npm run dev
 ```
 
 3. Відкрийте за адресою: http://localhost:5173
-````
