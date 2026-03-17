@@ -8,7 +8,25 @@ export const BinaryLab = () => {
   const [valB, setValB] = useState<number>(8.97);
   const [result, setResult] = useState<CalculationResult | null>(null);
 
-  // Функція для створення кодів (Прямий, Зворотний, Додатковий)
+  const getBinaryData = (num: number) => {
+    const absNum = Math.abs(num);
+    const integerPart = Math.floor(absNum);
+    let fractionalPart = absNum - integerPart;
+
+    const binInt = integerPart.toString(2);
+    let binFract = "";
+    while (binFract.length < 15 && fractionalPart > 0) {
+      fractionalPart *= 2;
+      binFract += Math.floor(fractionalPart);
+      fractionalPart -= Math.floor(fractionalPart);
+    }
+
+    const exponent = integerPart > 0 ? binInt.length : 0;
+    const rawMantissa = (binInt + binFract).padEnd(12, "0").substring(0, 12);
+
+    return { mantissa: rawMantissa, exp: exponent };
+  };
+
   const getCodes = (mantissa: string, isNegative: boolean): MantissaCodes => {
     const sign = isNegative ? "11" : "00";
     const direct = `${sign},${mantissa}`;
@@ -17,14 +35,12 @@ export const BinaryLab = () => {
       return { direct, inverse: direct, complement: direct };
     }
 
-    // Інверсія для зворотного
     const inverseM = mantissa
       .split("")
       .map((b) => (b === "1" ? "0" : "1"))
       .join("");
     const inverse = `${sign},${inverseM}`;
 
-    // Додавання 1 для додаткового
     let carry = 1;
     let compM = "";
     for (let i = inverseM.length - 1; i >= 0; i--) {
@@ -37,33 +53,42 @@ export const BinaryLab = () => {
     return { direct, inverse, complement };
   };
 
+  const addBinary = (s1: string, s2: string): string => {
+    let carry = 0;
+    let res = "";
+    const a = s1.replace(",", "");
+    const b = s2.replace(",", "");
+
+    for (let i = a.length - 1; i >= 0; i--) {
+      const sum = parseInt(a[i]) + parseInt(b[i]) + carry;
+      res = (sum % 2) + res;
+      carry = sum > 1 ? 1 : 0;
+    }
+    return res.substring(0, 2) + "," + res.substring(2);
+  };
+
   const handleCalculate = () => {
-    // Мантиси (вирівняні по порядку 2^7)
-    const rawA = "110101010010";
-    const rawB = "000100011111";
+    const dataA = getBinaryData(valA);
+    const dataB = getBinaryData(valB);
 
-    const codesA = getCodes(rawA, valA < 0);
-    const codesB = getCodes(rawB, valB < 0);
+    const maxExp = Math.max(dataA.exp, dataB.exp);
 
-    // Додавання мантис (завжди в додатковому коді)
-    const addBinary = (s1: string, s2: string): string => {
-      let carry = 0;
-      let res = "";
-      const a = s1.replace(",", "");
-      const b = s2.replace(",", "");
-
-      for (let i = a.length - 1; i >= 0; i--) {
-        const sum = parseInt(a[i]) + parseInt(b[i]) + carry;
-        res = (sum % 2) + res;
-        carry = sum > 1 ? 1 : 0;
-      }
-      return res.substring(0, 2) + "," + res.substring(2);
+    const alignMantissa = (m: string, currentExp: number, targetExp: number) => {
+      const diff = targetExp - currentExp;
+      if (diff <= 0) return m;
+      return "0".repeat(diff) + m.substring(0, 12 - diff);
     };
+
+    const mantA = alignMantissa(dataA.mantissa, dataA.exp, maxExp);
+    const mantB = alignMantissa(dataB.mantissa, dataB.exp, maxExp);
+
+    const codesA = getCodes(mantA, valA < 0);
+    const codesB = getCodes(mantB, valB < 0);
 
     const sumMod = addBinary(codesA.complement, codesB.complement);
 
     setResult({
-      exp: "111",
+      exp: maxExp.toString(2).padStart(3, "0"),
       A: { ...codesA, sign: valA < 0 ? "1" : "0" },
       B: { ...codesB, sign: valB < 0 ? "1" : "0" },
       C: {
