@@ -80,7 +80,8 @@ export interface CalculationResult {
 
 ### 🧠 Логіка програми (Core Logic)
 
-1. Десятково-двійкове перетворення та нормалізаціяФункція getBinaryData виконує переклад числа у плаваючу форму. Вона визначає мантису та порядок (2^k) на основі ваги цілої частини.
+1. Десятково-двійкове перетворення та нормалізація
+   Функція getBinaryData виконує переклад числа у плаваючу форму. Вона визначає мантису та порядок (2^k) на основі ваги цілої частини.
 
    ```typescript
    const absNum = Math.abs(num);
@@ -90,7 +91,8 @@ export interface CalculationResult {
    const rawMantissa = (binInt + binFract).padEnd(12, "0").substring(0, 12);
    ```
 
-2. Вирівнювання порядків (Aligning Exponents)Перед додаванням мантис необхідно звести їх до спільного знаменника. Функція alignMantissa зсуває мантису меншого числа вправо на різницю порядків.
+2. Вирівнювання порядків (Aligning Exponents)
+   Перед додаванням мантис необхідно звести їх до спільного знаменника. Функція alignMantissa зсуває мантису меншого числа вправо на різницю порядків.
 
    ```typescript
    const alignMantissa = (m: string, currentExp: number, targetExp: number) => {
