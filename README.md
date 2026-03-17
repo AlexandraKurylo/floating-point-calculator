@@ -80,60 +80,66 @@ export interface CalculationResult {
 
 ### 🧠 Логіка програми (Core Logic)
 
-1. Десятково-двійкове перетворення та нормалізація
-   Функція getBinaryData виконує переклад числа у плаваючу форму. Вона визначає мантису та порядок (2^k) на основі ваги цілої частини.
+#### 1. Десятково-двійкове перетворення та нормалізація
 
-   ```typescript
-   const absNum = Math.abs(num);
-   let binInt = Math.floor(absNum).toString(2);
-   const exponent = binInt.length;
-   // Формування нормалізованої мантиси (12 біт)
-   const rawMantissa = (binInt + binFract).padEnd(12, "0").substring(0, 12);
-   ```
+Функція getBinaryData виконує переклад числа у плаваючу форму. Вона визначає мантису та порядок (2^k) на основі ваги цілої частини.
 
-2. Вирівнювання порядків (Aligning Exponents)
-   Перед додаванням мантис необхідно звести їх до спільного знаменника. Функція alignMantissa зсуває мантису меншого числа вправо на різницю порядків.
+```typescript
+const absNum = Math.abs(num);
+let binInt = Math.floor(absNum).toString(2);
+const exponent = binInt.length;
+// Формування нормалізованої мантиси (12 біт)
+const rawMantissa = (binInt + binFract).padEnd(12, "0").substring(0, 12);
+```
 
-   ```typescript
-   const alignMantissa = (m: string, currentExp: number, targetExp: number) => {
-     const diff = targetExp - currentExp; // Різниця порядків
-     if (diff <= 0) return m;
-     // Зсув мантиси праворуч із заповненням нулями зліва
-     return "0".repeat(diff) + m.substring(0, 12 - diff);
-   };
-   ```
+#### 2. Вирівнювання порядків (Aligning Exponents)
 
-3. Генерація модифікованих кодівФункція getCodes реалізує знаковий контроль. Використання двох знаковых розрядів (00 або 11) дозволяє системі розпізнавати переповнення.
+Перед додаванням мантис необхідно звести їх до спільного знаменника. Функція alignMantissa зсуває мантису меншого числа вправо на різницю порядків.
 
-   ```typescript
-   const sign = isNegative ? "11" : "00"; // Модифікований знаковий розряд
-   const direct = `${sign},${mantissa}`; // Прямий код
-   // Розрахунок додаткового коду для від'ємних чисел (Інверсія + 1)
-   let carry = 1;
-   for (let i = inverseM.length - 1; i >= 0; i--) {
-     const sum = parseInt(inverseM[i]) + carry;
-     compM = (sum % 2) + compM;
-     carry = sum > 1 ? 1 : 0;
-   }
-   ```
+```typescript
+const alignMantissa = (m: string, currentExp: number, targetExp: number) => {
+  const diff = targetExp - currentExp; // Різниця порядків
+  if (diff <= 0) return m;
+  // Зсув мантиси праворуч із заповненням нулями зліва
+  return "0".repeat(diff) + m.substring(0, 12 - diff);
+};
+```
 
-4. Бінарний суматорФункція addBinary виконує арифметичне додавання модифікованих додаткових кодів. Вона імітує логіку роботи реальних тригерів процесора.
+#### 3. Генерація модифікованих кодів
 
-   ```typescript
-   const addBinary = (s1: string, s2: string): string => {
-     let carry = 0;
-     let res = "";
-     const a = s1.replace(",", ""); // Ігноруємо кому для розрахунку
-     const b = s2.replace(",", "");
-     for (let i = a.length - 1; i >= 0; i--) {
-       const sum = parseInt(a[i]) + parseInt(b[i]) + carry;
-       res = (sum % 2) + res; // Поточний біт результату
-       carry = sum > 1 ? 1 : 0; // Перенос у старший розряд
-     }
-     // Повернення коми після двох знакових розрядів
-     return res.substring(0, 2) + "," + res.substring(2);
-   };
-   ```
+Функція getCodes реалізує знаковий контроль. Використання двох знаковых розрядів (00 або 11) дозволяє системі розпізнавати переповнення.
+
+```typescript
+const sign = isNegative ? "11" : "00"; // Модифікований знаковий розряд
+const direct = `${sign},${mantissa}`; // Прямий код
+// Розрахунок додаткового коду для від'ємних чисел (Інверсія + 1)
+let carry = 1;
+for (let i = inverseM.length - 1; i >= 0; i--) {
+  const sum = parseInt(inverseM[i]) + carry;
+  compM = (sum % 2) + compM;
+  carry = sum > 1 ? 1 : 0;
+}
+```
+
+#### 4. Бінарний суматор
+
+Функція addBinary виконує арифметичне додавання модифікованих додаткових кодів. Вона імітує логіку роботи реальних тригерів процесора.
+
+```typescript
+const addBinary = (s1: string, s2: string): string => {
+  let carry = 0;
+  let res = "";
+  const a = s1.replace(",", ""); // Ігноруємо кому для розрахунку
+  const b = s2.replace(",", "");
+  for (let i = a.length - 1; i >= 0; i--) {
+    const sum = parseInt(a[i]) + parseInt(b[i]) + carry;
+    res = (sum % 2) + res; // Поточний біт результату
+    carry = sum > 1 ? 1 : 0; // Перенос у старший розряд
+  }
+  // Повернення коми після двох знакових розрядів
+  return res.substring(0, 2) + "," + res.substring(2);
+};
+```
 
 ### 📦 Встановлення та запуск
 
